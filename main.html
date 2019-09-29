@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Title of the document</title>
+<style>
+  body {
+    background-color: ivory;
+  }
+  canvas {
+      border:1px solid red;
+  }
+</style>
+</head>
+
+<body>
+  <canvas id="canvas" width=300 height=300></canvas>
+</body>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script>
+  var canvas = document.getElementById("canvas");
+  var ctx = canvas.getContext("2d");
+
+  var canvasOffset = $("#canvas").offset();
+  var offsetX = canvasOffset.left;
+  var offsetY = canvasOffset.top;
+
+  var steps = [{x:280, y:280},{x:20, y:20}, {x:20, y:200}, {x:200, y:20}];
+  var pos = 0;
+
+  // animation variables
+  var currentX = steps[pos].x;
+  var currentY = steps[pos].y;
+  var frameCount = 60;
+  var timer;
+  var points;
+  var currentFrame;
+
+  function animate() {
+      var point = points[currentFrame++];
+      draw(point.x, point.y);
+
+      // refire the timer until out-of-points
+      if (currentFrame < points.length) {
+        timer = setTimeout(animate, 1000 / 60);
+      }
+
+      if (currentFrame == points.length) {
+        if (pos < steps.length - 1){
+          pos ++;
+        } else {
+          pos = 0;
+        }
+        handleMouseDown(steps[pos].x, steps[pos].y);
+      }
+  }
+
+  function linePoints(x1, y1, x2, y2, frames) {
+      var dx = x2 - x1;
+      var dy = y2 - y1;
+      var length = Math.sqrt(dx * dx + dy * dy);
+      var incrementX = dx / frames;
+      var incrementY = dy / frames;
+      var a = new Array();
+
+      a.push({
+          x: x1,
+          y: y1
+      });
+      for (var frame = 0; frame < frames - 1; frame++) {
+          a.push({
+              x: x1 + (incrementX * frame),
+              y: y1 + (incrementY * frame)
+          });
+      }
+      a.push({
+          x: x2,
+          y: y2
+      });
+      return (a);
+  }
+
+  function draw(x, y) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.beginPath();
+      ctx.fillStyle = "skyblue";
+      ctx.strokeStyle = "gray";
+      ctx.rect(x, y, 30, 20);
+      ctx.fill();
+      ctx.stroke();
+  }
+
+  function handleMouseDown(x, y) {
+      points = linePoints(currentX, currentY, x, y, frameCount);
+      currentFrame = 0;
+      currentX = x;
+      currentY = y;
+      animate()
+  }
+
+  draw(steps[pos].x, steps[pos].y);
+  pos++;
+  handleMouseDown(steps[pos].x, steps[pos].y);
+</script>
+</html> 
